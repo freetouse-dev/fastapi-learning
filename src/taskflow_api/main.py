@@ -7,7 +7,7 @@ from taskflow_api.database import Base, engine
 from taskflow_api.models import task as task_model, user as user_model
 from taskflow_api.config import settings
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 

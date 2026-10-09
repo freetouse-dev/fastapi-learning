@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import time
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -9,8 +10,17 @@ from taskflow_api.security import hash_password, verify_password, create_access_
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+def send_welcome_email(email: str):
+    print(f"⏳ [EMAIL SERVICE]: Starting to send welcome email to {email}...")
+    time.sleep(3)
+    print(f"✅ [EMAIL SERVICE]: Welcome email successfully sent to {email}!")
+
 @router.post("/register", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
-def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
+def register_user(
+    user_data: UserCreate, 
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
         raise HTTPException(
@@ -25,6 +35,8 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    background_tasks.add_task(send_welcome_email, new_user.email)
 
     return new_user
 

@@ -5,10 +5,11 @@ from taskflow_api.routers import health, tasks
 from taskflow_api.exceptions import TaskNotFoundError
 from taskflow_api.database import Base, engine
 from taskflow_api.models import task as task_model
+from taskflow_api.config import settings
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="TaskFlow API", version="0.1.0")
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 
 @app.exception_handler(TaskNotFoundError)
 async def task_not_found_handler(request: Request, exc: TaskNotFoundError):

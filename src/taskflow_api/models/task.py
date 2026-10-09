@@ -1,5 +1,5 @@
-from sqlalchemy import Integer, String, Enum as SQLEnum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String, Enum as SQLEnum, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from taskflow_api.database import Base
 from taskflow_api.schemas.task import TaskStatus
@@ -14,3 +14,6 @@ class Task(Base):
         default=TaskStatus.PENDING,
         nullable=False
     )
+
+    owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    owner: Mapped["User"] = relationship("User", back_populates="tasks")

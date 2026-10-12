@@ -2,6 +2,7 @@ import time
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 from taskflow_api.routers import health, tasks, auth
 from taskflow_api.exceptions import TaskNotFoundError
@@ -11,7 +12,20 @@ from taskflow_api.config import settings
 
 # Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 [STARTUP]: TaskFlow API starting up...")
+    print(f"📦 [CONFIG]: Loaded project '{settings.PROJECT_NAME}' (v{settings.VERSION})")
+    
+    yield
+    
+    print("🛑 [SHUTDOWN]: TaskFlow API shutting down gracefully...")
+
+app = FastAPI(
+    title=settings.PROJECT_NAME, 
+    version=settings.VERSION,
+    lifespan=lifespan
+)
 
 origins = [
     "http://localhost:3000",
@@ -42,7 +56,7 @@ async def add_process_time_header(request: Request, call_next):
     start_time = time.perf_counter()
     response = await call_next(request)
     process_time = time.perf_counter() - start_time
-    
+
     response.headers["X-Process-Time"] = f"{process_time:.4f}s"
     print(f"⚡ [PERF]: {request.method} {request.url.path} completed in {process_time * 1000:.2f}ms")
 

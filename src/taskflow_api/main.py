@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from taskflow_api.routers import health, tasks, auth
 from taskflow_api.exceptions import TaskNotFoundError
 # from taskflow_api.database import Base, engine
-# from taskflow_api.models import task as task_model, user as user_model
+import taskflow_api.models  # Ensures all ORM models are registered in memory
 from taskflow_api.config import settings
 
 # Base.metadata.create_all(bind=engine)
